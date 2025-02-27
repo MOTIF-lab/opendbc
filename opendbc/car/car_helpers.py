@@ -127,8 +127,9 @@ def fingerprint(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_mu
 
   # CAN fingerprint
   # drain CAN socket so we get the latest messages
-  can_recv()
-  car_fingerprint, finger = can_fingerprint(can_recv)
+  if not fixed_fingerprint:
+    can_recv()
+    car_fingerprint, finger = can_fingerprint(can_recv)
 
   exact_match = True
   source = CarParams.FingerprintSource.can
@@ -142,6 +143,7 @@ def fingerprint(can_recv: CanRecvCallable, can_send: CanSendCallable, set_obd_mu
   if fixed_fingerprint:
     car_fingerprint = fixed_fingerprint
     source = CarParams.FingerprintSource.fixed
+    finger = gen_empty_fingerprint()
 
   carlog.error({"event": "fingerprinted", "car_fingerprint": str(car_fingerprint), "source": source, "fuzzy": not exact_match,
                 "cached": cached, "fw_count": len(car_fw), "ecu_responses": list(ecu_rx_addrs), "vin_rx_addr": vin_rx_addr,
